@@ -1,0 +1,32 @@
+{
+  "meta": {"schema_version":"1.0","title":"Waste–Energy–Carbon Nexus: MENA","subject":"Интеграция переработки, ВИЭ и углеродных единиц","geography":"Саудовская Аравия / Бахрейн","time_unit":"year","currency":"USD","created":"2026-08-09","summary":"Три рынка сходятся в 2025–2027. Основная стоимость создаётся не технологией, а связкой факторов: по отдельности они дают линейный эффект, вместе — сверхаддитивный.","confidence":"medium"},
+  "sources": [
+    {"id":"s1","title":"IEA / IRENA renewables cost data","url":"https://www.irena.org","year":2025,"reliability":"high"},
+    {"id":"s2","title":"Voluntary carbon market reviews","url":"https://alliedoffsets.com","year":2025,"reliability":"medium"}
+  ],
+  "blocks": [
+    {"id":"b1","model":"logistic","title":"Проникновение waste-to-value проектов в регионе","question":"На каком этапе S-кривой мы находимся?",
+     "data":{"series":[{"t":2016,"y":2},{"t":2018,"y":5},{"t":2020,"y":11},{"t":2022,"y":22},{"t":2024,"y":38},{"t":2026,"y":52}],"t_label":"Год","y_label":"% потенциала","forecast_periods":8,"K_hint":100},
+     "insight":"Точка перелома приходится примерно на текущий год — дальше скорость роста начнёт падать, а конкуренция за площадки расти.","conclusion":"Входить нужно сейчас: через 3–4 года преимущество первопроходца исчезает.","actions":["Зафиксировать 2–3 площадки в 2026","Подписать LOI до прохождения t₀"],"confidence":"medium","source_ids":["s1"]},
+
+    {"id":"b2","model":"logit","title":"Вероятность финансирования проекта","question":"Какой порог параметров переключает инвестора в «да»?",
+     "data":{"observations":[{"x":3,"y":0},{"x":5,"y":0},{"x":7,"y":0},{"x":9,"y":1},{"x":11,"y":1},{"x":14,"y":1},{"x":8,"y":0},{"x":10,"y":1}],"x_label":"Доля дохода от углеродных единиц, %","query_x":8},
+     "insight":"Ниже порога переговоры не конвертируются вообще — дело не в качестве презентации.","conclusion":"Дотянуть углеродную компоненту выше порога важнее, чем улучшать остальную модель.","actions":["Пересчитать проект под верификацию по Article 6","Добавить avoided-landfill компоненту"],"confidence":"low","source_ids":["s2"],"notes":"Экспертная оценка на малой выборке сделок."},
+
+    {"id":"b3","model":"interaction_matrix","title":"Синергия трёх рынков",
+     "data":{"factors":["Waste","Energy","Carbon"],"cells":[{"combo":["Low","Low","Low"],"value":0},{"combo":["High","Low","Low"],"value":25},{"combo":["Low","High","Low"],"value":15},{"combo":["Low","Low","High"],"value":20},{"combo":["High","High","Low"],"value":55},{"combo":["High","Low","High"],"value":60},{"combo":["High","High","High"],"value":100}]},
+     "insight":"Сумма одиночных эффектов даёт 60 из 100 — оставшиеся 40 создаёт исключительно связка.","conclusion":"Продавать нужно интеграцию, а не отдельный завод: именно избыток невидим для узких специалистов.","actions":["Оформить методику расчёта связки","Показать разрыв на реальном кейсе"],"confidence":"medium","source_ids":["s1","s2"]},
+
+    {"id":"b4","model":"monte_carlo","title":"NPV проекта с учётом неопределённости",
+     "data":{"variables":[{"name":"ebitda","dist":"triangular","params":{"low":3,"mode":6,"high":11}},{"name":"carbon","dist":"normal","params":{"mean":2.2,"sd":1.1}},{"name":"capex","dist":"normal","params":{"mean":50,"sd":9}}],"expression":"(ebitda + carbon)*8 - capex","success_threshold":0,"unit":"$ млн","n":20000},
+     "insight":"Углеродная компонента сдвигает вероятность успеха сильнее, чем экономия на капексе.","conclusion":"Риск концентрирован в capex — фиксировать его контрактом важнее, чем выторговывать выручку.","actions":["EPC с фиксированной ценой","Грант GCF на 20–30% capex"],"confidence":"medium","source_ids":["s2"]},
+
+    {"id":"b5","model":"game_matrix","title":"Переговоры с владельцем сырья",
+     "data":{"strategies":{"A":["Долгосрочный контракт","Спот"],"B":["Долгосрочный контракт","Спот"]},"payoffs":[[[4,4],[0,5]],[[5,0],[1,1]]]},
+     "insight":"Рациональное поведение обеих сторон ведёт в спот-режим, который хуже для всех.","conclusion":"Менять нужно не аргументы, а выплаты: залог, take-or-pay, доля в проекте.","actions":["Предложить take-or-pay с премией","Дать миноритарную долю поставщику"],"confidence":"high","source_ids":["s1"]},
+
+    {"id":"b6","model":"hyperbolic_discounting","title":"Почему длинные проекты не финансируются",
+     "data":{"params":{"k":0.55,"rho":0.09},"value":100,"horizon":20},
+     "insight":"На горизонте 7–10 лет разрыв восприятия максимален — там и умирают климатические проекты.","conclusion":"Разбить программу на 18–24-месячные этапы с измеримым результатом.","actions":["Переупаковать дорожную карту в вехи","Вынести первый денежный результат в 2026"],"confidence":"medium","source_ids":["s2"]}
+  ]
+}
